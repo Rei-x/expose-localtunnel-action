@@ -33,7 +33,7 @@ export const startTunnelProcess = async ({
   tunnel.unref();
 
   let saveTunnelUrl: string | undefined;
-  let saveTunnelFailed: string | undefined;
+  let saveTunnelFailed: string | undefined = "Tunnel failed to start.";
 
   tunnel.on("close", code => {
     if (code === null) {
@@ -68,7 +68,7 @@ export const startTunnelProcess = async ({
       }
     }
 
-    if (saveTunnelUrl || saveTunnelFailed) {
+    if (saveTunnelUrl) {
       break;
     }
     await delay(200);

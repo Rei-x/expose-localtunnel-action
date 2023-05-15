@@ -42,7 +42,7 @@ const startTunnelProcess = ({ command, args }) => __awaiter(void 0, void 0, void
     });
     tunnel.unref();
     let saveTunnelUrl;
-    let saveTunnelFailed;
+    let saveTunnelFailed = "Tunnel failed to start.";
     tunnel.on("close", code => {
         if (code === null) {
             console.log(`Tunnel process exited with code null`);
@@ -69,7 +69,7 @@ const startTunnelProcess = ({ command, args }) => __awaiter(void 0, void 0, void
                 console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
             }
         }
-        if (saveTunnelUrl || saveTunnelFailed) {
+        if (saveTunnelUrl) {
             break;
         }
         yield (0, exports.delay)(200);
@@ -158,9 +158,8 @@ function run() {
                         github.context.repo.repo;
             }
             if (!subdomain) {
-                subdomain = (0, nanoid_1.nanoid)().toLowerCase();
+                subdomain = (0, nanoid_1.nanoid)().toLowerCase().replace(/_/g, "");
             }
-            subdomain = subdomain.replace(/[^a-z0-9]/gi, "");
             const globalNodeModules = (0, child_process_1.execSync)("npm root -g").toString().trim();
             for (const port of ports) {
                 const subdomainWithPort = `${subdomain}-${port}`;
@@ -183,7 +182,6 @@ function run() {
                 }
                 (0, processManagement_1.savePIDToFile)((_a = data.tunnel.pid) !== null && _a !== void 0 ? _a : 0);
             }
-            process.exit(0);
         }
         catch (error) {
             if (error instanceof Error) {

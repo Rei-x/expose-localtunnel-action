@@ -35,10 +35,9 @@ async function run(): Promise<void> {
     }
 
     if (!subdomain) {
-      subdomain = nanoid().toLowerCase();
+      subdomain = nanoid().toLowerCase().replace(/_/g, "");
     }
 
-    subdomain = subdomain.replace(/[^a-z0-9]/gi, "");
     const globalNodeModules = execSync("npm root -g").toString().trim();
 
     for (const port of ports) {
@@ -65,8 +64,6 @@ async function run(): Promise<void> {
 
       savePIDToFile(data.tunnel.pid ?? 0);
     }
-
-    process.exit(0);
   } catch (error) {
     if (error instanceof Error) {
       core.setFailed(error.message);
