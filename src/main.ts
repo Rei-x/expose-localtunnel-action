@@ -16,6 +16,16 @@ mkdirSync("/tmp/tunnels", { recursive: true });
 
 installLocalTunnel();
 
+// print all env variables
+console.log(">> Environment variables:");
+
+for (const key in process.env) {
+  if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+    const value = process.env[key];
+    console.log(`>> ${key}=${value ?? ""}`);
+  }
+}
+
 async function run(): Promise<void> {
   try {
     let subdomain = core.getInput("subdomain");
@@ -35,8 +45,12 @@ async function run(): Promise<void> {
     }
 
     if (!subdomain) {
-      subdomain = nanoid().toLowerCase().replace(/_/g, "");
+      subdomain = nanoid().toLowerCase();
     }
+
+    // replace all non-alphanumeric characters with a dash
+
+    subdomain = subdomain.replace(/[^a-zA-Z0-9]/g, "-");
 
     const globalNodeModules = execSync("npm root -g").toString().trim();
 

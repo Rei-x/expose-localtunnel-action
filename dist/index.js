@@ -140,6 +140,14 @@ const installLocalTunnel = () => {
 };
 (0, fs_1.mkdirSync)("/tmp/tunnels", { recursive: true });
 installLocalTunnel();
+// print all env variables
+console.log(">> Environment variables:");
+for (const key in process.env) {
+    if (Object.prototype.hasOwnProperty.call(process.env, key)) {
+        const value = process.env[key];
+        console.log(`>> ${key}=${value !== null && value !== void 0 ? value : ""}`);
+    }
+}
 function run() {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -158,8 +166,10 @@ function run() {
                         github.context.repo.repo;
             }
             if (!subdomain) {
-                subdomain = (0, nanoid_1.nanoid)().toLowerCase().replace(/_/g, "");
+                subdomain = (0, nanoid_1.nanoid)().toLowerCase();
             }
+            // replace all non-alphanumeric characters with a dash
+            subdomain = subdomain.replace(/[^a-zA-Z0-9]/g, "-");
             const globalNodeModules = (0, child_process_1.execSync)("npm root -g").toString().trim();
             for (const port of ports) {
                 const subdomainWithPort = `${subdomain}-${port}`;
