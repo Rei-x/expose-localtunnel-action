@@ -45,6 +45,7 @@ async function run(): Promise<void> {
         core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
       }
     }
+
     process.exit(0);
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message);
