@@ -16,48 +16,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.startTunnelProcess = exports.waitForTunnelToBeReady = exports.delay = void 0;
+exports.startTunnelProcess = exports.delay = void 0;
 const child_process_1 = __nccwpck_require__(2081);
 const DEBUG_OUTPUT = false;
-let saveTunnelUrl = undefined;
-let saveTunnelFailed = undefined;
 /**
  * Helper funciton to await a defined amount of time.
  */
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 exports.delay = delay;
 /**
- * Wait for the tunnel service to receive its URL from stdout, before it will then store this output
- * in a file that we can pick up.
- *
- * NOTE: We wait about 10 seconds (50 * 200ms = 10,000ms = 10s).
- */
-const waitForTunnelToBeReady = () => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(`>> Waiting for tunnel url to be set.`);
-    for (let i = 0; i < 50; i++) {
-        if (!saveTunnelUrl && !saveTunnelFailed) {
-            yield (0, exports.delay)(200);
-        }
-    }
-    const tunnelUrl = saveTunnelUrl;
-    const tunnelFailed = saveTunnelFailed;
-    if (tunnelFailed) {
-        saveTunnelUrl = undefined;
-        saveTunnelFailed = undefined;
-    }
-    return {
-        tunnelUrl,
-        tunnelFailed
-    };
-});
-exports.waitForTunnelToBeReady = waitForTunnelToBeReady;
-/**
  * Start a tunnel as a child process, and listen for its stdout.
  */
-const startTunnelProcess = ({ command, args }) => {
-    // Start the tunnel command with the supplied arguments.
+const startTunnelProcess = ({ command, args }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`>> Starting tunnel: ${command} ${args.join(" ")}`);
     const tunnel = (0, child_process_1.spawn)(command, args);
+    let saveTunnelUrl;
+    let saveTunnelFailed;
     tunnel.stdout.on("data", data => {
         const stringData = `${data}`;
         console.log(`stdout: ${stringData}`);
@@ -67,17 +41,22 @@ const startTunnelProcess = ({ command, args }) => {
             console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
         }
     });
-    tunnel.stderr.on("data", data => {
+    tunnel.stderr.on("data", (data) => {
         const stringData = `${data}`;
         if (!stringData) {
             return;
         }
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (DEBUG_OUTPUT) {
             console.error(`stderr: ${data}`);
         }
         saveTunnelFailed = stringData;
     });
     tunnel.on("close", code => {
+        if (code === null) {
+            console.log(`Tunnel process exited with code null`);
+            return;
+        }
         console.log(`Tunnel process exited with code ${code}`);
     });
     process.on("SIGINT", () => {
@@ -88,8 +67,20 @@ const startTunnelProcess = ({ command, args }) => {
         console.log(`Process was terminated with SIGTERM.`);
         process.exit(0);
     });
-    return tunnel;
-};
+    console.log(`>> Waiting for tunnel url to be set.`);
+    for (let i = 0; i < 50; i++) {
+        if (!saveTunnelUrl && !saveTunnelFailed) {
+            yield (0, exports.delay)(200);
+        }
+    }
+    const tunnelUrl = saveTunnelUrl;
+    const tunnelFailed = saveTunnelFailed;
+    return {
+        tunnelUrl,
+        tunnelFailed,
+        tunnel
+    };
+});
 exports.startTunnelProcess = startTunnelProcess;
 
 
@@ -134,9 +125,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+const child_process_1 = __nccwpck_require__(2081);
 const nanoid_1 = __nccwpck_require__(7592);
 const helpers_1 = __nccwpck_require__(5008);
-const github = __importStar(__nccwpck_require__(5438));
+const installLocalTunnel = () => {
+    console.log(">> Installing localtunnel...");
+    (0, child_process_1.execSync)("npm install -g localtunnel");
+};
+installLocalTunnel();
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -163,25 +160,27 @@ function run() {
                     "--subdomain",
                     subdomainWithPort
                 ];
-                (0, helpers_1.startTunnelProcess)({
+                const data = yield (0, helpers_1.startTunnelProcess)({
                     command: "npx",
                     args
                 });
-                const data = yield (0, helpers_1.waitForTunnelToBeReady)();
-                core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
                 if (data.tunnelFailed) {
                     core.setFailed(data.tunnelFailed);
                 }
-                process.exit(0);
+                else {
+                    core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
+                }
             }
+            process.exit(0);
         }
         catch (error) {
-            if (error instanceof Error)
+            if (error instanceof Error) {
                 core.setFailed(error.message);
+            }
         }
     });
 }
-run();
+void run();
 
 
 /***/ }),

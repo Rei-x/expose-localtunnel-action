@@ -1,12 +1,21 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
+import { execSync } from "child_process";
 import { nanoid } from "nanoid";
 
 import { startTunnelProcess } from "./helpers";
 
+const installLocalTunnel = () => {
+  console.log(">> Installing localtunnel...");
+  execSync("npm install -g localtunnel");
+};
+
+installLocalTunnel();
+
 async function run(): Promise<void> {
   try {
     let subdomain = core.getInput("subdomain");
+
     const ports = core
       .getInput("ports", {
         required: true
