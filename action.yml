@@ -1,6 +1,6 @@
-name: "pull-request-preview"
-description: "Provide a description here"
-author: "Your name or organization here"
+name: "expose-tunnel"
+description: "Simple action that can start local tunnel to your local machine and expose ports to the internet."
+author: "Rei-x"
 inputs:
   ports:
     description: "Ports to expose, example 3000,3001,3002"
