@@ -1,6 +1,7 @@
 import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { execSync } from "child_process";
+import { mkdirSync } from "fs";
 import { nanoid } from "nanoid";
 
 import { startTunnelProcess } from "./helpers";
@@ -10,6 +11,8 @@ const installLocalTunnel = () => {
   console.log(">> Installing localtunnel...");
   execSync("npm install -g localtunnel");
 };
+
+mkdirSync("/tmp/tunnels", { recursive: true });
 
 installLocalTunnel();
 
@@ -36,12 +39,13 @@ async function run(): Promise<void> {
     }
 
     subdomain = subdomain.replace(/[^a-z0-9]/gi, "");
+    const globalNodeModules = execSync("npm root -g").toString().trim();
 
     for (const port of ports) {
       const subdomainWithPort = `${subdomain}-${port}`;
 
       const args = [
-        "localtunnel",
+        `${globalNodeModules}/localtunnel/bin/lt`,
         "--port",
         port,
         "--subdomain",
@@ -49,14 +53,16 @@ async function run(): Promise<void> {
       ];
 
       const data = await startTunnelProcess({
-        command: "npx",
+        command: "node",
         args
       });
+
       if (data.tunnelFailed) {
         core.setFailed(data.tunnelFailed);
       } else {
         core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
       }
+
       savePIDToFile(data.tunnel.pid ?? 0);
     }
 

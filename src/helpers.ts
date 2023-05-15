@@ -1,6 +1,5 @@
 import { spawn } from "child_process";
-
-const DEBUG_OUTPUT = false;
+import fs from "fs";
 
 /**
  * Helper funciton to await a defined amount of time.
@@ -19,34 +18,22 @@ export const startTunnelProcess = async ({
   args: string[];
 }) => {
   console.log(`>> Starting tunnel: ${command} ${args.join(" ")}`);
-  const tunnel = spawn(command, args);
+
+  const outLogFile = "/tmp/tunnels/stdout.log";
+  const errLogFile = "/tmp/tunnels/stderr.log";
+
+  const out = fs.openSync(outLogFile, "w");
+  const err = fs.openSync(errLogFile, "w");
+
+  const tunnel = spawn(command, args, {
+    detached: true,
+    stdio: ["ignore", out, err]
+  });
+
+  tunnel.unref();
 
   let saveTunnelUrl: string | undefined;
   let saveTunnelFailed: string | undefined;
-
-  tunnel.stdout.on("data", data => {
-    const stringData = `${data as string}`;
-    console.log(`stdout: ${stringData}`);
-
-    // If the tunnel URL is not yet set, then we will set it.
-    if (!saveTunnelUrl && stringData.startsWith("your url is: ")) {
-      saveTunnelUrl = stringData.replace("your url is: ", "").trim();
-      console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
-    }
-  });
-
-  tunnel.stderr.on("data", (data: string) => {
-    const stringData = `${data}`;
-    if (!stringData) {
-      return;
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (DEBUG_OUTPUT) {
-      console.error(`stderr: ${data}`);
-    }
-
-    saveTunnelFailed = stringData;
-  });
 
   tunnel.on("close", code => {
     if (code === null) {
@@ -70,12 +57,27 @@ export const startTunnelProcess = async ({
   console.log(`>> Waiting for tunnel url to be set.`);
 
   for (let i = 0; i < 50; i++) {
-    if (!saveTunnelUrl && !saveTunnelFailed) {
-      await delay(200);
+    const fileExists = fs.existsSync("/tmp/tunnels/stdout.log");
+
+    if (fileExists) {
+      const fileContents = fs.readFileSync("/tmp/tunnels/stdout.log", "utf8");
+      if (fileContents.includes("your url is: ")) {
+        saveTunnelFailed = undefined;
+        saveTunnelUrl = fileContents.replace("your url is: ", "").trim();
+        console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
+      }
     }
+
+    if (saveTunnelUrl || saveTunnelFailed) {
+      break;
+    }
+    await delay(200);
   }
   const tunnelUrl = saveTunnelUrl;
   const tunnelFailed = saveTunnelFailed;
+
+  fs.closeSync(err);
+  fs.closeSync(out);
 
   return {
     tunnelUrl,

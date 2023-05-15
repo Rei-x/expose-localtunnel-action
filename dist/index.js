@@ -15,10 +15,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.startTunnelProcess = exports.delay = void 0;
 const child_process_1 = __nccwpck_require__(2081);
-const DEBUG_OUTPUT = false;
+const fs_1 = __importDefault(__nccwpck_require__(7147));
 /**
  * Helper funciton to await a defined amount of time.
  */
@@ -29,29 +32,17 @@ exports.delay = delay;
  */
 const startTunnelProcess = ({ command, args }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(`>> Starting tunnel: ${command} ${args.join(" ")}`);
-    const tunnel = (0, child_process_1.spawn)(command, args);
+    const outLogFile = "/tmp/tunnels/stdout.log";
+    const errLogFile = "/tmp/tunnels/stderr.log";
+    const out = fs_1.default.openSync(outLogFile, "w");
+    const err = fs_1.default.openSync(errLogFile, "w");
+    const tunnel = (0, child_process_1.spawn)(command, args, {
+        detached: true,
+        stdio: ["ignore", out, err]
+    });
+    tunnel.unref();
     let saveTunnelUrl;
     let saveTunnelFailed;
-    tunnel.stdout.on("data", data => {
-        const stringData = `${data}`;
-        console.log(`stdout: ${stringData}`);
-        // If the tunnel URL is not yet set, then we will set it.
-        if (!saveTunnelUrl && stringData.startsWith("your url is: ")) {
-            saveTunnelUrl = stringData.replace("your url is: ", "").trim();
-            console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
-        }
-    });
-    tunnel.stderr.on("data", (data) => {
-        const stringData = `${data}`;
-        if (!stringData) {
-            return;
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (DEBUG_OUTPUT) {
-            console.error(`stderr: ${data}`);
-        }
-        saveTunnelFailed = stringData;
-    });
     tunnel.on("close", code => {
         if (code === null) {
             console.log(`Tunnel process exited with code null`);
@@ -69,12 +60,24 @@ const startTunnelProcess = ({ command, args }) => __awaiter(void 0, void 0, void
     });
     console.log(`>> Waiting for tunnel url to be set.`);
     for (let i = 0; i < 50; i++) {
-        if (!saveTunnelUrl && !saveTunnelFailed) {
-            yield (0, exports.delay)(200);
+        const fileExists = fs_1.default.existsSync("/tmp/tunnels/stdout.log");
+        if (fileExists) {
+            const fileContents = fs_1.default.readFileSync("/tmp/tunnels/stdout.log", "utf8");
+            if (fileContents.includes("your url is: ")) {
+                saveTunnelFailed = undefined;
+                saveTunnelUrl = fileContents.replace("your url is: ", "").trim();
+                console.log(`>> Tunnel URL is: ${saveTunnelUrl}`);
+            }
         }
+        if (saveTunnelUrl || saveTunnelFailed) {
+            break;
+        }
+        yield (0, exports.delay)(200);
     }
     const tunnelUrl = saveTunnelUrl;
     const tunnelFailed = saveTunnelFailed;
+    fs_1.default.closeSync(err);
+    fs_1.default.closeSync(out);
     return {
         tunnelUrl,
         tunnelFailed,
@@ -127,6 +130,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 const child_process_1 = __nccwpck_require__(2081);
+const fs_1 = __nccwpck_require__(7147);
 const nanoid_1 = __nccwpck_require__(7592);
 const helpers_1 = __nccwpck_require__(5008);
 const processManagement_1 = __nccwpck_require__(8168);
@@ -134,6 +138,7 @@ const installLocalTunnel = () => {
     console.log(">> Installing localtunnel...");
     (0, child_process_1.execSync)("npm install -g localtunnel");
 };
+(0, fs_1.mkdirSync)("/tmp/tunnels", { recursive: true });
 installLocalTunnel();
 function run() {
     var _a;
@@ -156,17 +161,18 @@ function run() {
                 subdomain = (0, nanoid_1.nanoid)().toLowerCase();
             }
             subdomain = subdomain.replace(/[^a-z0-9]/gi, "");
+            const globalNodeModules = (0, child_process_1.execSync)("npm root -g").toString().trim();
             for (const port of ports) {
                 const subdomainWithPort = `${subdomain}-${port}`;
                 const args = [
-                    "localtunnel",
+                    `${globalNodeModules}/localtunnel/bin/lt`,
                     "--port",
                     port,
                     "--subdomain",
                     subdomainWithPort
                 ];
                 const data = yield (0, helpers_1.startTunnelProcess)({
-                    command: "npx",
+                    command: "node",
                     args
                 });
                 if (data.tunnelFailed) {
@@ -221,13 +227,16 @@ const killSavedPIDs = () => {
     const pids = (0, exports.getSavedPIDs)();
     pids.forEach(pid => {
         try {
-            process.kill(pid);
+            process.kill(pid, "SIGTERM");
+            console.log(`Killed process ${pid}`);
         }
         catch (e) {
             console.log(`Failed to kill process ${pid}: ${e}`);
         }
     });
-    fs_1.default.unlinkSync(pidsFile);
+    if (fs_1.default.existsSync(pidsFile)) {
+        fs_1.default.unlinkSync(pidsFile);
+    }
 };
 exports.killSavedPIDs = killSavedPIDs;
 

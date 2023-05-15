@@ -22,10 +22,14 @@ export const killSavedPIDs = () => {
   const pids = getSavedPIDs();
   pids.forEach(pid => {
     try {
-      process.kill(pid);
+      process.kill(pid, "SIGTERM");
+      console.log(`Killed process ${pid}`);
     } catch (e) {
       console.log(`Failed to kill process ${pid}: ${e as string}`);
     }
   });
-  fs.unlinkSync(pidsFile);
+
+  if (fs.existsSync(pidsFile)) {
+    fs.unlinkSync(pidsFile);
+  }
 };

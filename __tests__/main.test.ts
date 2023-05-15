@@ -6,9 +6,11 @@ import { test } from "@jest/globals";
 test("test runs", () => {
   process.env["INPUT_PORTS"] = "3000,4000";
   const np = process.execPath;
-  const ip = path.join(__dirname, "..", "lib", "main.js");
+  const mainFile = path.join(__dirname, "..", "lib", "main.js");
+  const cleanupFile = path.join(__dirname, "..", "lib", "cleanup.js");
   const options: cp.ExecFileSyncOptions = {
     env: process.env
   };
-  console.log(cp.execFileSync(np, [ip], options).toString());
+  console.log(cp.execFileSync(np, [mainFile], options).toString());
+  console.log(cp.execFileSync(np, [cleanupFile], options).toString());
 });
