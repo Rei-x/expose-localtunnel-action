@@ -162,8 +162,8 @@ function run() {
             const currentBranchName = getBranchName();
             if (currentBranchName) {
                 subdomain = currentBranchName + "-" + github.context.repo.repo;
-                if (subdomain.length > 60) {
-                    subdomain = subdomain.substring(0, 60);
+                if (subdomain.length > 58) {
+                    subdomain = subdomain.substring(0, 58);
                 }
             }
             if (!subdomain) {
