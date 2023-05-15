@@ -160,8 +160,9 @@ function run() {
             })
                 .split(",");
             const currentBranchName = getBranchName();
+            console.log(getBranchName);
             if (currentBranchName) {
-                subdomain = "-" + github.context.repo.repo;
+                subdomain = currentBranchName + "-" + github.context.repo.repo;
             }
             if (!subdomain) {
                 subdomain = (0, nanoid_1.nanoid)().toLowerCase();
