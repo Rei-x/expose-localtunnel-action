@@ -40,10 +40,12 @@ async function run(): Promise<void> {
 
     const currentBranchName = getBranchName();
 
-    console.log(getBranchName);
-
     if (currentBranchName) {
       subdomain = currentBranchName + "-" + github.context.repo.repo;
+
+      if (subdomain.length > 63) {
+        subdomain = subdomain.substring(0, 63);
+      }
     }
 
     if (!subdomain) {
