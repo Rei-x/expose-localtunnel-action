@@ -36,7 +36,8 @@ async function run(): Promise<void> {
       })
       .split(",");
 
-    const currentBranchName = github.context.ref;
+    const currentBranchName =
+      process.env.GITHUB_HEAD_REF ?? process.env.GITHUB_REF;
     if (currentBranchName) {
       subdomain =
         currentBranchName.replace("refs/heads/", "") +
