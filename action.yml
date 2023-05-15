@@ -9,4 +9,4 @@ inputs:
 runs:
   using: "node16"
   main: "dist/index.js"
-  post: "cleanup/dist.js"
+  post: "cleanup/index.js"
