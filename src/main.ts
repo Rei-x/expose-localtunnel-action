@@ -43,8 +43,8 @@ async function run(): Promise<void> {
     if (currentBranchName) {
       subdomain = currentBranchName + "-" + github.context.repo.repo;
 
-      if (subdomain.length > 63) {
-        subdomain = subdomain.substring(0, 63);
+      if (subdomain.length > 60) {
+        subdomain = subdomain.substring(0, 60);
       }
     }
 
