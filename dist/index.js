@@ -129,12 +129,14 @@ const github = __importStar(__nccwpck_require__(5438));
 const child_process_1 = __nccwpck_require__(2081);
 const nanoid_1 = __nccwpck_require__(7592);
 const helpers_1 = __nccwpck_require__(5008);
+const processManagement_1 = __nccwpck_require__(8168);
 const installLocalTunnel = () => {
     console.log(">> Installing localtunnel...");
     (0, child_process_1.execSync)("npm install -g localtunnel");
 };
 installLocalTunnel();
 function run() {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let subdomain = core.getInput("subdomain");
@@ -145,7 +147,10 @@ function run() {
                 .split(",");
             const currentBranchName = github.context.ref;
             if (currentBranchName) {
-                subdomain = currentBranchName.replace("refs/heads/", "");
+                subdomain =
+                    currentBranchName.replace("refs/heads/", "") +
+                        "-" +
+                        github.context.repo.repo;
             }
             if (!subdomain) {
                 subdomain = (0, nanoid_1.nanoid)().toLowerCase();
@@ -170,6 +175,7 @@ function run() {
                 else {
                     core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
                 }
+                (0, processManagement_1.savePIDToFile)((_a = data.tunnel.pid) !== null && _a !== void 0 ? _a : 0);
             }
             process.exit(0);
         }
@@ -181,6 +187,49 @@ function run() {
     });
 }
 void run();
+
+
+/***/ }),
+
+/***/ 8168:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.killSavedPIDs = exports.savePIDToFile = exports.getSavedPIDs = void 0;
+const fs_1 = __importDefault(__nccwpck_require__(7147));
+const pidsFile = "/tmp/tunnels/localtunnel-pids.json";
+const getSavedPIDs = () => {
+    if (!fs_1.default.existsSync(pidsFile)) {
+        return [];
+    }
+    const pids = fs_1.default.readFileSync(pidsFile, "utf8");
+    return JSON.parse(pids);
+};
+exports.getSavedPIDs = getSavedPIDs;
+const savePIDToFile = (pid) => {
+    const pids = (0, exports.getSavedPIDs)();
+    pids.push(pid);
+    fs_1.default.writeFileSync(pidsFile, JSON.stringify(pids));
+};
+exports.savePIDToFile = savePIDToFile;
+const killSavedPIDs = () => {
+    const pids = (0, exports.getSavedPIDs)();
+    pids.forEach(pid => {
+        try {
+            process.kill(pid);
+        }
+        catch (e) {
+            console.log(`Failed to kill process ${pid}: ${e}`);
+        }
+    });
+    fs_1.default.unlinkSync(pidsFile);
+};
+exports.killSavedPIDs = killSavedPIDs;
 
 
 /***/ }),

@@ -4,6 +4,7 @@ import { execSync } from "child_process";
 import { nanoid } from "nanoid";
 
 import { startTunnelProcess } from "./helpers";
+import { savePIDToFile } from "./processManagement";
 
 const installLocalTunnel = () => {
   console.log(">> Installing localtunnel...");
@@ -23,9 +24,11 @@ async function run(): Promise<void> {
       .split(",");
 
     const currentBranchName = github.context.ref;
-
     if (currentBranchName) {
-      subdomain = currentBranchName.replace("refs/heads/", "");
+      subdomain =
+        currentBranchName.replace("refs/heads/", "") +
+        "-" +
+        github.context.repo.repo;
     }
 
     if (!subdomain) {
@@ -54,6 +57,7 @@ async function run(): Promise<void> {
       } else {
         core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
       }
+      savePIDToFile(data.tunnel.pid ?? 0);
     }
 
     process.exit(0);
