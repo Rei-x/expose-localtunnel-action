@@ -140,8 +140,17 @@ const installLocalTunnel = () => {
 };
 (0, fs_1.mkdirSync)("/tmp/tunnels", { recursive: true });
 installLocalTunnel();
+const getBranchName = () => {
+    if (process.env.GITHUB_HEAD_REF) {
+        return process.env.GITHUB_HEAD_REF;
+    }
+    if (process.env.GITHUB_REF) {
+        return process.env.GITHUB_REF.replace("refs/heads/", "");
+    }
+    return undefined;
+};
 function run() {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let subdomain = core.getInput("subdomain");
@@ -150,12 +159,9 @@ function run() {
                 required: true
             })
                 .split(",");
-            const currentBranchName = (_a = process.env.GITHUB_HEAD_REF) !== null && _a !== void 0 ? _a : process.env.GITHUB_REF;
+            const currentBranchName = getBranchName();
             if (currentBranchName) {
-                subdomain =
-                    currentBranchName.replace("refs/heads/", "") +
-                        "-" +
-                        github.context.repo.repo;
+                subdomain = "-" + github.context.repo.repo;
             }
             if (!subdomain) {
                 subdomain = (0, nanoid_1.nanoid)().toLowerCase();
@@ -182,7 +188,7 @@ function run() {
                 else {
                     core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
                 }
-                (0, processManagement_1.savePIDToFile)((_b = data.tunnel.pid) !== null && _b !== void 0 ? _b : 0);
+                (0, processManagement_1.savePIDToFile)((_a = data.tunnel.pid) !== null && _a !== void 0 ? _a : 0);
             }
         }
         catch (error) {

@@ -16,6 +16,18 @@ mkdirSync("/tmp/tunnels", { recursive: true });
 
 installLocalTunnel();
 
+const getBranchName = () => {
+  if (process.env.GITHUB_HEAD_REF) {
+    return process.env.GITHUB_HEAD_REF;
+  }
+
+  if (process.env.GITHUB_REF) {
+    return process.env.GITHUB_REF.replace("refs/heads/", "");
+  }
+
+  return undefined;
+};
+
 async function run(): Promise<void> {
   try {
     let subdomain = core.getInput("subdomain");
@@ -26,13 +38,9 @@ async function run(): Promise<void> {
       })
       .split(",");
 
-    const currentBranchName =
-      process.env.GITHUB_HEAD_REF ?? process.env.GITHUB_REF;
+    const currentBranchName = getBranchName();
     if (currentBranchName) {
-      subdomain =
-        currentBranchName.replace("refs/heads/", "") +
-        "-" +
-        github.context.repo.repo;
+      subdomain = "-" + github.context.repo.repo;
     }
 
     if (!subdomain) {
