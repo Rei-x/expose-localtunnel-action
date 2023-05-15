@@ -1,19 +1,54 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import * as core from "@actions/core";
+import { nanoid } from "nanoid";
+import { startTunnelProcess } from "./helpers";
+import * as github from "@actions/github";
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    let subdomain = core.getInput("subdomain");
+    const ports = core
+      .getInput("ports", {
+        required: true
+      })
+      .split(",");
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+    const currentBranchName = github.context.ref;
 
-    core.setOutput('time', new Date().toTimeString())
+    if (currentBranchName) {
+      subdomain = currentBranchName.replace("refs/heads/", "");
+    }
+
+    if (!subdomain) {
+      subdomain = nanoid().toLowerCase();
+    }
+
+    subdomain = subdomain.replace(/[^a-z0-9]/gi, "");
+
+    for (const port of ports) {
+      const subdomainWithPort = `${subdomain}-${port}`;
+
+      const args = [
+        "localtunnel",
+        "--port",
+        port,
+        "--subdomain",
+        subdomainWithPort
+      ];
+
+      const data = await startTunnelProcess({
+        command: "npx",
+        args
+      });
+      if (data.tunnelFailed) {
+        core.setFailed(data.tunnelFailed);
+      } else {
+        core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
+      }
+    }
+    process.exit(0);
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-run()
+run();
