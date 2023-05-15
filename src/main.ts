@@ -1,7 +1,8 @@
 import * as core from "@actions/core";
-import { nanoid } from "nanoid";
-import { startTunnelProcess } from "./helpers";
 import * as github from "@actions/github";
+import { nanoid } from "nanoid";
+
+import { startTunnelProcess } from "./helpers";
 
 async function run(): Promise<void> {
   try {
@@ -48,8 +49,10 @@ async function run(): Promise<void> {
 
     process.exit(0);
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message);
+    if (error instanceof Error) {
+      core.setFailed(error.message);
+    }
   }
 }
 
-run();
+void run();

@@ -24,7 +24,7 @@ export const killSavedPIDs = () => {
     try {
       process.kill(pid);
     } catch (e) {
-      console.log(`Failed to kill process ${pid}: ${e}`);
+      console.log(`Failed to kill process ${pid}: ${e as string}`);
     }
   });
   fs.unlinkSync(pidsFile);

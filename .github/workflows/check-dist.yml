@@ -10,10 +10,10 @@ on:
     branches:
       - main
     paths-ignore:
-      - '**.md'
+      - "**.md"
   pull_request:
     paths-ignore:
-      - '**.md'
+      - "**.md"
   workflow_dispatch:
 
 jobs:
@@ -34,7 +34,8 @@ jobs:
       - name: Rebuild the dist/ directory
         run: |
           npm run build
-          npm run package
+          npm run package:main
+          npm run package:cleanup
 
       - name: Compare the expected and actual dist/ directories
         run: |

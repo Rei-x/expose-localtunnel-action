@@ -25,7 +25,7 @@ export const startTunnelProcess = async ({
   let saveTunnelFailed: string | undefined;
 
   tunnel.stdout.on("data", data => {
-    const stringData = `${data}`;
+    const stringData = `${data as string}`;
     console.log(`stdout: ${stringData}`);
 
     // If the tunnel URL is not yet set, then we will set it.
@@ -35,11 +35,12 @@ export const startTunnelProcess = async ({
     }
   });
 
-  tunnel.stderr.on("data", data => {
+  tunnel.stderr.on("data", (data: string) => {
     const stringData = `${data}`;
     if (!stringData) {
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (DEBUG_OUTPUT) {
       console.error(`stderr: ${data}`);
     }
@@ -48,6 +49,11 @@ export const startTunnelProcess = async ({
   });
 
   tunnel.on("close", code => {
+    if (code === null) {
+      console.log(`Tunnel process exited with code null`);
+      return;
+    }
+
     console.log(`Tunnel process exited with code ${code}`);
   });
 
