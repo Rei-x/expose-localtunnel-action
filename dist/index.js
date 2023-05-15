@@ -140,16 +140,8 @@ const installLocalTunnel = () => {
 };
 (0, fs_1.mkdirSync)("/tmp/tunnels", { recursive: true });
 installLocalTunnel();
-// print all env variables
-console.log(">> Environment variables:");
-for (const key in process.env) {
-    if (Object.prototype.hasOwnProperty.call(process.env, key)) {
-        const value = process.env[key];
-        console.log(`>> ${key}=${value !== null && value !== void 0 ? value : ""}`);
-    }
-}
 function run() {
-    var _a;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             let subdomain = core.getInput("subdomain");
@@ -158,7 +150,7 @@ function run() {
                 required: true
             })
                 .split(",");
-            const currentBranchName = github.context.ref;
+            const currentBranchName = (_a = process.env.GITHUB_HEAD_REF) !== null && _a !== void 0 ? _a : process.env.GITHUB_REF;
             if (currentBranchName) {
                 subdomain =
                     currentBranchName.replace("refs/heads/", "") +
@@ -190,7 +182,7 @@ function run() {
                 else {
                     core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
                 }
-                (0, processManagement_1.savePIDToFile)((_a = data.tunnel.pid) !== null && _a !== void 0 ? _a : 0);
+                (0, processManagement_1.savePIDToFile)((_b = data.tunnel.pid) !== null && _b !== void 0 ? _b : 0);
             }
         }
         catch (error) {
