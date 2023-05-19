@@ -17,6 +17,14 @@ mkdirSync("/tmp/tunnels", { recursive: true });
 installLocalTunnel();
 
 const getBranchName = () => {
+  try {
+    const branchName = execSync("git branch --show-current");
+
+    return branchName.toString().trim();
+  } catch (error) {
+    console.log(error);
+  }
+
   if (process.env.GITHUB_HEAD_REF) {
     return process.env.GITHUB_HEAD_REF;
   }
@@ -41,7 +49,13 @@ async function run(): Promise<void> {
     const currentBranchName = getBranchName();
 
     if (currentBranchName) {
-      subdomain = currentBranchName + "-" + github.context.repo.repo;
+      subdomain = currentBranchName;
+
+      try {
+        subdomain = `${subdomain}-${github.context.repo.repo}`;
+      } catch (error) {
+        console.log(error);
+      }
 
       if (subdomain.length > 58) {
         subdomain = subdomain.substring(0, 58);
