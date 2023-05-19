@@ -6,6 +6,17 @@ inputs:
     description: "Ports to expose, example 3000,3001,3002"
     required: true
     default: "3000"
+outputs:
+  url-1:
+    description: "URL to access your local machine for port 1"
+  url-2:
+    description: "URL to access your local machine for port 2"
+  url-3:
+    description: "URL to access your local machine for port 3"
+  url-4:
+    description: "URL to access your local machine for port 4"
+  url-5:
+    description: "URL to access your local machine for port 5"
 runs:
   using: "node16"
   main: "dist/index.js"

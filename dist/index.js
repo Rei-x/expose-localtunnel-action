@@ -172,6 +172,7 @@ function run() {
             // replace all non-alphanumeric characters with a dash
             subdomain = subdomain.replace(/[^a-zA-Z0-9]/g, "-");
             const globalNodeModules = (0, child_process_1.execSync)("npm root -g").toString().trim();
+            let index = 1;
             for (const port of ports) {
                 const subdomainWithPort = `${subdomain}-${port}`;
                 const args = [
@@ -189,9 +190,10 @@ function run() {
                     core.setFailed(data.tunnelFailed);
                 }
                 else {
-                    core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
+                    core.setOutput("url-" + index, data.tunnelUrl);
                 }
                 (0, processManagement_1.savePIDToFile)((_a = data.tunnel.pid) !== null && _a !== void 0 ? _a : 0);
+                index++;
             }
         }
         catch (error) {

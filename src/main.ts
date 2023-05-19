@@ -58,6 +58,8 @@ async function run(): Promise<void> {
 
     const globalNodeModules = execSync("npm root -g").toString().trim();
 
+    let index = 1;
+
     for (const port of ports) {
       const subdomainWithPort = `${subdomain}-${port}`;
 
@@ -77,10 +79,12 @@ async function run(): Promise<void> {
       if (data.tunnelFailed) {
         core.setFailed(data.tunnelFailed);
       } else {
-        core.setOutput("tunnelUrl-port-" + port, data.tunnelUrl);
+        core.setOutput("url-" + index, data.tunnelUrl);
       }
 
       savePIDToFile(data.tunnel.pid ?? 0);
+
+      index++;
     }
   } catch (error) {
     if (error instanceof Error) {
