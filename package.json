@@ -30,8 +30,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/github": "^5.1.1",
     "nanoid": "^3.3.6"
-  "nanoid": "^3.3.6"
-    "nanoid": "^3.3.6"
+  "nanoid": "^3.3.6",
   "devDependencies": {
     "@alergeek-ventures/eslint-config": "^8.0.40",
     "@types/localtunnel": "^2.0.1",
