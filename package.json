@@ -2,8 +2,8 @@
  "name": "localtunnel-action",
   "version": "1.0.0",
   "private": true,
-  "description": "TypeScript template action",
-  "main": "lib/main.js",
+  "description": "Github action for exposing local ports to the internet",
+  "main": "src/main.ts",
   "scripts": {
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
