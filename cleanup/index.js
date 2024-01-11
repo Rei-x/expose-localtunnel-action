@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.killSavedPIDs = exports.savePIDToFile = exports.getSavedPIDs = void 0;
 const fs_1 = __importDefault(__nccwpck_require__(52));
-const pidsFile = "/home/runner/work/expose-localtunnel-action/expose-localtunnel-action/tmp/tunnels/localtunnel-pids.json";
+const pidsFile = "/opt/localtunnel-pids.json";
 const getSavedPIDs = () => {
     if (!fs_1.default.existsSync(pidsFile)) {
         return [];
@@ -24,7 +24,7 @@ exports.getSavedPIDs = getSavedPIDs;
 const savePIDToFile = (pid) => {
     const pids = (0, exports.getSavedPIDs)();
     pids.push(pid);
-    fs_1.default.writeFileSync(pidsFile, JSON.stringify(pids));
+    fs_1.default.writeFileSync(pidsFile, JSON.stringify(pids))
 };
 exports.savePIDToFile = savePIDToFile;
 const killSavedPIDs = () => {
