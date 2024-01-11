@@ -1,6 +1,6 @@
 {
   "name": "typescript-action",
-  "version": "1.0.0" 
+  "version": "1.0.0", ,   
   "private": "true",
   "description": "A GitHub action for exposing local ports to the internet",
   "main": "dist/index.js",
@@ -28,7 +28,7 @@
   "dependencies": {
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
-    "@actions/github": "^5.1.1",
+        "@actions/github": "^5.1.1",
     "nanoid": "^3.3.6"
   },
   "devDependencies": {
