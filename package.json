@@ -1,5 +1,5 @@
 {
-  "name": "localtunnel-action",
+  "name": "localtunnel-action"
   "version": "1.0.0",
   "private": true,
   "description": "TypeScript template action",
