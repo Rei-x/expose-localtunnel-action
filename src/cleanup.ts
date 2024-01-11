@@ -1,3 +1,3 @@
-import { killSavedPIDs } from "./processManagement";
+import { services, killSavedPIDs } from "@typescript-eslint";
 
 killSavedPIDs();
