@@ -17,7 +17,7 @@ export const getSavedPIDs = (): number[] => {
 export const savePIDToFile = (pid: number) => {
   const pids = getSavedPIDs();
   pids.push(pid);
-  fs.writeFileSync(pidsFile, JSON.stringify(pids));
+  fs.writeFileSync(pidsFile, JSON.stringify(pids), "utf8");
 };
 
 export const killSavedPIDs = () => {
