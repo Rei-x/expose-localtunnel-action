@@ -1,4 +1,4 @@
-import fs from "fs";
+const fs = require('fs');
 
 const pidsFile = "/tmp/tunnels/localtunnel-pids.json";
 
@@ -13,16 +13,16 @@ export const getSavedPIDs = (): number[] => {
 };
 
 export const savePIDToFile = (pid: number) => {
-  const pids = getSavedPIDs();
+  const pids = exports.getSavedPIDs();
   pids.push(pid);
   fs.writeFileSync(pidsFile, JSON.stringify(pids));
 };
 
 export const killSavedPIDs = () => {
-  const pids = getSavedPIDs();
+  const pids = exports.getSavedPIDs();
   pids.forEach(pid => {
     try {
-      process.kill(pid, "SIGTERM");
+      process.kill(pid, 'SIGTERM');
       console.log(`Killed process ${pid}`);
     } catch (e) {
       console.log(`Failed to kill process ${pid}: ${e as string}`);
