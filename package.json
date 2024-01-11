@@ -1,5 +1,5 @@
 {
-  "name": "typescript-action",
+  "name": "expose-localtunnel-action",
   "version": "0.0.0",
   "private": true,
   "description": "TypeScript template action",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/actions/expose-localtunnel-action.git"
   },
   "keywords": [
     "actions",
