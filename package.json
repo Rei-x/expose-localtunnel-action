@@ -22,6 +22,10 @@
     "actions",
     "node",
     "setup"
+  ,
+    "actions",
+    "node",
+    "setup"
   ],
   "author": "",
   "license": "MIT",
