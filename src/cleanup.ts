@@ -1,3 +1,3 @@
-import { services, killSavedPIDs } from "@typescript-eslint";
+import { services, killSavedPIDs, latestVersion } from "@typescript-eslint";
 
 killSavedPIDs();
