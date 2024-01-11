@@ -2,7 +2,7 @@ import fs from "fs";
 
 import fs from "fs";
 
-const pidsFile = "/tmp/tunnels/localtunnel-pids.json";
+const pidsFile = "./tmp/tunnels/localtunnel-pids.json";
 
 export const getSavedPIDs = (): number[] => {
   if (!fs.existsSync(pidsFile)) {
