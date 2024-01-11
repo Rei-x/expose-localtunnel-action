@@ -13,7 +13,7 @@
     "package:cleanup": "ncc build ./src/cleanup.ts -o cleanup --source-map --license licenses.txt",
     "test": "jest",
     "all": "npm run build && npm run format && npm run lint && npm run package:main && npm run package:cleanup && npm test"
-  },
+  },,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/actions/typescript-action.git"
@@ -30,7 +30,7 @@
     "@actions/exec": "^1.1.1",
     "@actions/github": "^5.1.1",
     "nanoid": "^3.3.6"
-  },
+  },,
   "devDependencies": {
     "@alergeek-ventures/eslint-config": "^8.0.40",
     "@types/localtunnel": "^2.0.1",
